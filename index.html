@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="stats-active">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -8,60 +8,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="今日热量">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
   <title>今日热量 · 累积柱</title>
 </head>
-<body>
+<body class="stats-active">
   <div class="app-shell">
-    <header class="app-header">
-      <div>
-        <p class="eyebrow">DAILY ENERGY</p>
-        <h1>今天，吃了多少？</h1>
-        <p class="date-line" id="today-label"></p>
-      </div>
-    </header>
-
     <main>
-      <section id="record-view" class="view is-active" aria-labelledby="record-tab">
-        <div class="calorie-summary" aria-live="polite">
-          <span>今日已记录热量</span>
-          <strong><span id="today-calories">0</span><small> kcal</small></strong>
-        </div>
-
-        <section class="details-section" aria-labelledby="details-heading">
-          <div class="section-heading">
-            <div>
-              <p class="section-kicker">NEW ENTRY</p>
-              <h2 id="details-heading">记录一次摄入</h2>
-            </div>
-          </div>
-          <div class="input-stack">
-            <label>
-              <span>食物名称（选填）</span>
-              <input id="food-name" type="text" maxlength="80" autocomplete="off" placeholder="例如：蛋糕">
-            </label>
-            <label>
-              <span>热量</span>
-              <span class="unit-input">
-                <input id="food-calories" type="number" min="1" max="99999" inputmode="decimal" placeholder="例如：450">
-                <span>kcal</span>
-              </span>
-            </label>
-          </div>
-          <button class="save-button" id="save-button" type="button" disabled>填写热量后记录</button>
-          <p class="save-hint">保存时自动读取手机当前时间；统计页会按时间区间汇总热量。</p>
-        </section>
-
-        <section class="recent-section" aria-labelledby="recent-heading">
-          <div class="section-heading compact">
-            <h2 id="recent-heading">今日记录</h2>
-            <span id="entry-count">0 条</span>
-          </div>
-          <div id="today-records" class="records-list"></div>
-        </section>
-      </section>
-
-      <section id="stats-view" class="view stats-view" aria-labelledby="stats-tab" hidden>
+      <section id="stats-view" class="view stats-view">
         <div class="stats-toolbar">
           <button class="date-button" id="previous-day" type="button" aria-label="前一天">‹</button>
           <div class="date-picker-control">
@@ -88,18 +41,19 @@
           </span>
           <button id="stats-save-button" type="submit" disabled>记录</button>
         </form>
-        <div class="stats-food-records" id="stats-food-records" aria-live="polite"></div>
+        <div class="calorie-summary stats-bottom-summary" aria-live="polite">
+          <span id="summary-title">今日已记录热量</span>
+          <strong><span id="today-calories">0</span><small> kcal</small></strong>
+        </div>
+        <section class="recent-section stats-records-section" aria-labelledby="recent-heading">
+          <div class="section-heading compact">
+            <h2 id="recent-heading">详细记录</h2>
+            <span id="entry-count">0 条</span>
+          </div>
+          <div id="today-records" class="records-list"></div>
+        </section>
       </section>
     </main>
-
-    <nav class="bottom-nav" aria-label="主要页面">
-      <button class="nav-button is-active" id="record-tab" type="button" data-view="record" aria-current="page">
-        <span aria-hidden="true">●</span><span>记录</span>
-      </button>
-      <button class="nav-button" id="stats-tab" type="button" data-view="stats">
-        <span aria-hidden="true">▥</span><span>统计</span>
-      </button>
-    </nav>
   </div>
 
   <dialog id="edit-record-dialog">
@@ -134,7 +88,7 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js').catch(() => {});

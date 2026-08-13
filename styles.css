@@ -18,7 +18,7 @@ button, input, textarea { font: inherit; }
 button { color: inherit; -webkit-tap-highlight-color: transparent; }
 button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid rgba(32, 112, 255, .3); outline-offset: 2px; }
 
-.app-shell { width: min(100%, 760px); min-height: 100dvh; margin: 0 auto; padding: max(22px, env(safe-area-inset-top)) 18px calc(94px + var(--safe-bottom)); }
+.app-shell { width: min(100%, 760px); min-height: 100dvh; margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom)); }
 .app-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 body.stats-active .app-header { margin-bottom: 8px; }
 body.stats-active .app-header .eyebrow,
@@ -77,10 +77,6 @@ h2 { margin-bottom: 0; font-size: 1.08rem; font-weight: 720; }
 .record-time { color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
 .delete-record { width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #9b5752; font-size: 1.2rem; cursor: pointer; }
 
-.bottom-nav { position: fixed; z-index: 20; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; width: min(calc(100% - 64px), 320px); padding: 4px; border: 1px solid rgba(210,205,196,.9); border-radius: 17px; background: rgba(255,253,249,.9); box-shadow: 0 10px 30px rgba(50,44,34,.13); backdrop-filter: blur(16px); transform: translateX(-50%); }
-.nav-button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; border: 0; border-radius: 13px; background: transparent; color: var(--muted); font-size: .8rem; font-weight: 700; cursor: pointer; }
-.nav-button.is-active { background: var(--accent); color: white; }
-
 .stats-toolbar { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 10px; margin-bottom: 8px; }
 .date-button { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); font-size: 1.6rem; cursor: pointer; }
 .date-button:disabled { opacity: .35; cursor: default; }
@@ -104,11 +100,8 @@ h2 { margin-bottom: 0; font-size: 1.08rem; font-weight: 720; }
 .stats-calorie-input span { position: absolute; top: 50%; right: 7px; color: var(--muted); font-size: .58rem; transform: translateY(-50%); pointer-events: none; }
 .stats-quick-entry button { border: 0; background: var(--accent); color: white; font-size: .75rem; font-weight: 750; }
 .stats-quick-entry button:disabled { background: #d8d4cc; color: #77736b; }
-.stats-food-records { display: grid; margin: 12px 4px 0; }
-.stats-food-row { display: grid; grid-template-columns: 50px minmax(0, 1fr) auto; align-items: start; gap: 10px; padding: 12px 3px; border-bottom: 1px solid var(--line); }
-.stats-food-time { color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
-.stats-food-name { min-width: 0; color: var(--ink); font-size: .86rem; line-height: 1.45; overflow-wrap: anywhere; white-space: normal; }
-.stats-food-calories { color: var(--muted); font-size: .78rem; white-space: nowrap; text-align: right; }
+.stats-bottom-summary { margin: 18px 0 22px; }
+.stats-records-section { margin-bottom: 10px; }
 
 dialog { width: min(calc(100% - 24px), 680px); max-height: min(88dvh, 820px); padding: 0; overflow: hidden; border: 0; border-radius: 24px; background: var(--card); color: var(--ink); box-shadow: 0 24px 80px rgba(32,28,22,.25); }
 dialog::backdrop { background: rgba(28,26,22,.5); backdrop-filter: blur(3px); }
@@ -153,15 +146,13 @@ dialog form { max-height: min(88dvh, 820px); padding: 22px; overflow-y: auto; }
   body.stats-active .app-shell { width: 100%; max-width: none; height: 100svh; min-height: 0; padding: 6px max(8px, env(safe-area-inset-right)) 6px max(8px, env(safe-area-inset-left)); overflow: hidden; }
   body.stats-active .app-header { display: none; }
   body.stats-active #stats-view { position: fixed; inset: 6px max(8px, env(safe-area-inset-right)) 6px max(112px, calc(env(safe-area-inset-left) + 106px)); display: block; width: auto; height: auto; min-height: 0; overflow-x: hidden; overflow-y: auto; }
-  .stats-toolbar { position: fixed; top: 6px; bottom: 96px; left: max(6px, env(safe-area-inset-left)); display: flex; width: 102px; min-height: 0; flex-direction: column; justify-content: center; margin: 0; }
+  .stats-toolbar { position: fixed; top: 6px; bottom: 6px; left: max(6px, env(safe-area-inset-left)); display: flex; width: 102px; min-height: 0; flex-direction: column; justify-content: center; margin: 0; }
   .date-picker-control { order: -1; width: 100%; padding: 6px 0; }
   .date-button { width: 38px; height: 32px; }
-  .chart-card { display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; height: calc(100% - 47px); max-height: calc(100% - 47px); padding: 4px 2px 2px; overflow: hidden; border-radius: 14px; }
-  .chart-wrap { flex: 1 1 0; min-height: 0; height: 0; max-height: 100%; overflow: hidden; }
+  .chart-card { height: min(78vh, 520px); max-height: none; padding: 4px 2px 2px; border-radius: 14px; }
+  .chart-wrap { height: 100%; max-height: 100%; overflow: hidden; }
   .stats-quick-entry { height: 42px; margin: 5px 0 0; }
   .stats-quick-entry input, .stats-quick-entry button { height: 38px; }
-  body.stats-active .bottom-nav { left: max(8px, env(safe-area-inset-left)); bottom: 8px; display: flex; flex-direction: column; width: 88px; padding: 3px; transform: none; }
-  .nav-button { min-height: 34px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
