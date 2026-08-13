@@ -495,7 +495,7 @@ function renderChart() {
     const topY = yFor(dailyTotal);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.font = `700 ${compact ? 8 : 10}px system-ui, sans-serif`;
+    ctx.font = `800 ${compact ? 12 : 15}px system-ui, sans-serif`;
     ctx.fillStyle = '#47443e';
     ctx.fillText(`${dailyTotal.toLocaleString('zh-CN')} kcal`, barX + barWidth / 2, Math.max(11, topY - 5));
   }
@@ -619,6 +619,8 @@ elements.chart.addEventListener('pointermove', moveChartInteraction);
 elements.chart.addEventListener('pointerup', endChartInteraction);
 elements.chart.addEventListener('pointercancel', endChartInteraction);
 elements.chart.addEventListener('contextmenu', (event) => event.preventDefault());
+elements.chart.addEventListener('selectstart', (event) => event.preventDefault());
+elements.chart.addEventListener('dragstart', (event) => event.preventDefault());
 
 if ('ResizeObserver' in window) {
   const resizeObserver = new ResizeObserver(() => {

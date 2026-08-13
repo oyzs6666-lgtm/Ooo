@@ -1,5 +1,5 @@
-const CACHE_NAME = 'calorie-stack-v1';
-const APP_FILES = ['./', './index.html', './styles.css?v=1', './app.js?v=1', './manifest.json'];
+const CACHE_NAME = 'calorie-stack-v2';
+const APP_FILES = ['./', './index.html', './styles.css?v=2', './app.js?v=2', './manifest.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_FILES)).then(() => self.skipWaiting()));
