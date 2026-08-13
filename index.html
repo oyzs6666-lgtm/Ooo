@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="今日热量">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
   <title>今日热量 · 累积柱</title>
 </head>
 <body>
@@ -80,6 +80,14 @@
             <div class="chart-tooltip bar-summary" id="chart-tooltip" hidden></div>
           </div>
         </div>
+        <form class="stats-quick-entry" id="stats-quick-entry">
+          <input id="stats-food-name" type="text" maxlength="80" autocomplete="off" aria-label="食物名称" placeholder="食物名称">
+          <span class="stats-calorie-input">
+            <input id="stats-food-calories" type="number" min="1" max="99999" inputmode="decimal" aria-label="热量" placeholder="热量">
+            <span>kcal</span>
+          </span>
+          <button id="stats-save-button" type="submit" disabled>记录</button>
+        </form>
         <div class="stats-food-records" id="stats-food-records" aria-live="polite"></div>
       </section>
     </main>
@@ -126,7 +134,7 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js').catch(() => {});

@@ -19,6 +19,7 @@ let selectedGroupId = null;
 let chartBars = [];
 let pointerState = null;
 let longPressTimer = null;
+let chartAnimation = null;
 let toastTimer;
 let scrollSaveTimer;
 
@@ -41,6 +42,10 @@ const elements = {
   statsDateLabel: document.querySelector('#stats-date-label'),
   statsDateInput: document.querySelector('#stats-date-input'),
   nextDay: document.querySelector('#next-day'),
+  statsQuickEntry: document.querySelector('#stats-quick-entry'),
+  statsFoodName: document.querySelector('#stats-food-name'),
+  statsFoodCalories: document.querySelector('#stats-food-calories'),
+  statsSaveButton: document.querySelector('#stats-save-button'),
   chart: document.querySelector('#calorie-chart'),
   chartWrap: document.querySelector('#chart-wrap'),
   chartEmpty: document.querySelector('#chart-empty'),
@@ -205,6 +210,40 @@ function saveRecord() {
   updateSaveButton();
   renderHome();
   if (dateKey(record.timestamp) === statsDate) renderChart();
+  showToast('热量记录已保存');
+}
+
+function updateStatsSaveButton() {
+  const calories = Number(elements.statsFoodCalories.value);
+  elements.statsSaveButton.disabled = !(Number.isFinite(calories) && calories > 0 && calories <= 99999);
+}
+
+function saveStatsRecord(event) {
+  event.preventDefault();
+  const calories = Number(elements.statsFoodCalories.value);
+  if (!Number.isFinite(calories) || calories <= 0 || calories > 99999) {
+    showToast('请填写有效的热量数字');
+    return;
+  }
+  const now = new Date();
+  const targetDate = dateFromKey(statsDate);
+  targetDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0);
+  const previousTotal = calorieEntriesForStats().reduce((sum, entry) => sum + (Number(entry.calories) || 0), 0);
+  const record = { id: makeId(), timestamp: targetDate.toISOString(), food: elements.statsFoodName.value.trim(), calories };
+  entries.push(record);
+  try {
+    persistEntries();
+  } catch {
+    entries.pop();
+    showToast('保存失败，浏览器存储空间可能已满');
+    return;
+  }
+  elements.statsFoodName.value = '';
+  elements.statsFoodCalories.value = '';
+  updateStatsSaveButton();
+  selectedGroupId = null;
+  renderHome();
+  animateChartGrowth(previousTotal, previousTotal + calories);
   showToast('热量记录已保存');
 }
 
@@ -399,10 +438,11 @@ function foodLabelForGroup(group) {
     .join('、');
 }
 
-function renderChart() {
+function renderChart(animatedTotal = null) {
   renderStatsFoodRecords();
   const groups = groupedCalories();
   const dailyTotal = groups.reduce((sum, group) => sum + group.total, 0);
+  const visibleTotal = animatedTotal === null ? dailyTotal : Math.max(0, Math.min(dailyTotal, animatedTotal));
   const bounds = elements.chartWrap.getBoundingClientRect();
   if (!bounds.width || !bounds.height) return;
   const canvas = elements.chart;
@@ -421,7 +461,7 @@ function renderChart() {
   elements.chartEmpty.hidden = groups.length > 0;
 
   const compact = bounds.height < 310;
-  const plot = { left: compact ? 29 : 33, right: bounds.width - 4, top: compact ? 28 : 34, bottom: bounds.height - 10 };
+  const plot = { left: compact ? 27 : 29, right: bounds.width - 1, top: compact ? 5 : 7, bottom: bounds.height - 4 };
   const unit = (plot.bottom - plot.top) / 19;
   const y1800 = plot.top + unit;
   const yFor = (value) => {
@@ -454,13 +494,14 @@ function renderChart() {
   chartBars = groups.map((group) => {
     const start = cumulative;
     cumulative += group.total;
-    const y = yFor(cumulative);
+    const visibleEnd = Math.min(cumulative, visibleTotal);
+    const y = yFor(Math.max(start, visibleEnd));
     const bottom = yFor(start);
-    return { ...group, x: barX, y, width: barWidth, height: Math.max(2, bottom - y), start, end: cumulative };
-  });
+    return { ...group, x: barX, y, width: barWidth, height: Math.max(0, bottom - y), start, end: cumulative, fullyVisible: visibleEnd >= cumulative };
+  }).filter((bar) => bar.height > .25);
 
-  chartBars.forEach((bar, index) => {
-    const radius = index === 0 || index === chartBars.length - 1 ? 4 : 1.5;
+  chartBars.forEach((bar) => {
+    const radius = 3;
     ctx.fillStyle = colorForCalories(bar.total);
     roundedBarPath(ctx, bar.x, bar.y, bar.width, bar.height, radius);
     ctx.fill();
@@ -487,17 +528,8 @@ function renderChart() {
     }
   }
 
-  if (dailyTotal > 0) {
-    const topY = yFor(dailyTotal);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.font = `800 ${compact ? 12 : 15}px system-ui, sans-serif`;
-    ctx.fillStyle = '#47443e';
-    ctx.fillText(`${dailyTotal.toLocaleString('zh-CN')} kcal`, barX + barWidth / 2, Math.max(11, topY - 5));
-  }
-
   const labelX = barX + barWidth + 12;
-  const labels = chartBars
+  const labels = chartBars.filter((bar) => bar.fullyVisible)
     .map((bar) => ({ bar, desired: bar.y + bar.height / 2, y: bar.y + bar.height / 2 }))
     .sort((first, second) => first.desired - second.desired);
   const minGap = compact ? 12 : 14;
@@ -531,6 +563,24 @@ function renderChart() {
     elements.chartTooltip.textContent = `${foodText} ｜ ${selected.total} kcal${selected.merged ? ` ｜ 已合并${selected.entries.length}条` : ''}`;
     elements.chartTooltip.hidden = false;
   }
+}
+
+function animateChartGrowth(fromTotal, toTotal) {
+  if (chartAnimation) cancelAnimationFrame(chartAnimation);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || toTotal <= fromTotal) {
+    renderChart();
+    return;
+  }
+  const startTime = performance.now();
+  const duration = 760;
+  const frame = (now) => {
+    const progress = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    renderChart(fromTotal + (toTotal - fromTotal) * eased);
+    if (progress < 1) chartAnimation = requestAnimationFrame(frame);
+    else chartAnimation = null;
+  };
+  chartAnimation = requestAnimationFrame(frame);
 }
 
 function chartPoint(event) {
@@ -589,6 +639,8 @@ function showToast(message) {
 
 elements.foodCalories.addEventListener('input', updateSaveButton);
 elements.saveButton.addEventListener('click', saveRecord);
+elements.statsFoodCalories.addEventListener('input', updateStatsSaveButton);
+elements.statsQuickEntry.addEventListener('submit', saveStatsRecord);
 elements.todayRecords.addEventListener('click', (event) => {
   const deleteButton = event.target.closest('[data-delete]');
   if (deleteButton) { deleteRecord(deleteButton.dataset.delete); return; }
@@ -647,4 +699,5 @@ window.addEventListener('pageshow', () => showView(currentView));
 
 renderHome();
 updateSaveButton();
+updateStatsSaveButton();
 showView(currentView);
