@@ -87,7 +87,7 @@ h2 { margin-bottom: 0; font-size: 1.08rem; font-weight: 720; }
 .date-picker-button span { margin-top: 2px; color: var(--muted); font-size: .68rem; }
 .date-picker-native { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; margin: 0; border: 0; opacity: .001; cursor: pointer; -webkit-appearance: none; appearance: none; }
 .chart-card { border: 1px solid var(--line); border-radius: 22px; background: var(--card); padding: 7px 2px 6px; box-shadow: 0 8px 30px rgba(67,57,37,.05); }
-.chart-wrap { position: relative; width: 100%; height: clamp(430px, 68vh, 680px); touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.chart-wrap { position: relative; width: 100%; height: clamp(500px, 76vh, 780px); touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 #calorie-chart { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .chart-empty { position: absolute; inset: 45% 18px auto; color: var(--muted); text-align: center; font-size: .84rem; pointer-events: none; }
 .chart-tooltip { position: absolute; z-index: 2; max-width: 190px; padding: 8px 10px; border-radius: 10px; background: rgba(36,35,31,.92); color: white; font-size: .72rem; line-height: 1.4; pointer-events: none; transform: translate(-50%, calc(-100% - 12px)); }
@@ -149,7 +149,7 @@ dialog form { max-height: min(88dvh, 820px); padding: 22px; overflow-y: auto; }
   .stats-toolbar { position: fixed; top: 6px; bottom: 6px; left: max(6px, env(safe-area-inset-left)); display: flex; width: 102px; min-height: 0; flex-direction: column; justify-content: center; margin: 0; }
   .date-picker-control { order: -1; width: 100%; padding: 6px 0; }
   .date-button { width: 38px; height: 32px; }
-  .chart-card { height: min(78vh, 520px); max-height: none; padding: 4px 2px 2px; border-radius: 14px; }
+  .chart-card { height: min(88vh, 580px); max-height: none; padding: 4px 2px 2px; border-radius: 14px; }
   .chart-wrap { height: 100%; max-height: 100%; overflow: hidden; }
   .stats-quick-entry { height: 42px; margin: 5px 0 0; }
   .stats-quick-entry input, .stats-quick-entry button { height: 38px; }
