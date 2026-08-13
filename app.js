@@ -497,11 +497,13 @@ function renderChart(animatedTotal = null) {
     const visibleEnd = Math.min(cumulative, visibleTotal);
     const y = yFor(Math.max(start, visibleEnd));
     const bottom = yFor(start);
-    return { ...group, x: barX, y, width: barWidth, height: Math.max(0, bottom - y), start, end: cumulative, fullyVisible: visibleEnd >= cumulative };
+    const rawHeight = Math.max(0, bottom - y);
+    const gap = Math.min(1.5, rawHeight * .18);
+    return { ...group, x: barX, y: y + gap / 2, width: barWidth, height: Math.max(0, rawHeight - gap), start, end: cumulative, fullyVisible: visibleEnd >= cumulative };
   }).filter((bar) => bar.height > .25);
 
   chartBars.forEach((bar) => {
-    const radius = 3;
+    const radius = 7;
     ctx.fillStyle = colorForCalories(bar.total);
     roundedBarPath(ctx, bar.x, bar.y, bar.width, bar.height, radius);
     ctx.fill();
@@ -522,7 +524,7 @@ function renderChart(animatedTotal = null) {
       ctx.save();
       ctx.globalAlpha = .72;
       ctx.fillStyle = colorForCalories(source.total);
-      roundedBarPath(ctx, source.x, ghostY, source.width, source.height, 4);
+      roundedBarPath(ctx, source.x, ghostY, source.width, source.height, 7);
       ctx.fill();
       ctx.restore();
     }
