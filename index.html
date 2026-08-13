@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="今日热量">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
   <title>今日热量 · 累积柱</title>
 </head>
 <body>
@@ -73,11 +73,6 @@
           </div>
           <button class="date-button" id="next-day" type="button" aria-label="后一天">›</button>
         </div>
-        <div class="chart-total-summary" aria-live="polite">
-          <span id="chart-total-title">今日总热量</span>
-          <strong><span id="chart-total-value">0</span> kcal</strong>
-        </div>
-        <p class="stack-help">拖动色块到另一色块可合并；长按已合并色块可拆解。</p>
         <div class="chart-card">
           <div class="chart-wrap" id="chart-wrap">
             <canvas id="calorie-chart" role="img" aria-label="当天0至1800千卡的累积热量柱状图"></canvas>
@@ -131,7 +126,7 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js').catch(() => {});

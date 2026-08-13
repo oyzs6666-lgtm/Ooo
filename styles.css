@@ -90,9 +90,6 @@ h2 { margin-bottom: 0; font-size: 1.08rem; font-weight: 720; }
 .date-picker-button strong { font-size: 1rem; }
 .date-picker-button span { margin-top: 2px; color: var(--muted); font-size: .68rem; }
 .date-picker-native { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; margin: 0; border: 0; opacity: .001; cursor: pointer; -webkit-appearance: none; appearance: none; }
-.chart-total-summary { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 7px 8px; color: var(--muted); font-size: .76rem; }
-.chart-total-summary strong { color: var(--ink); font-family: Georgia, serif; font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-.stack-help { margin: -3px 7px 8px; color: var(--muted); font-size: .66rem; line-height: 1.4; }
 .chart-card { border: 1px solid var(--line); border-radius: 22px; background: var(--card); padding: 17px 4px 14px; box-shadow: 0 8px 30px rgba(67,57,37,.05); }
 .chart-wrap { position: relative; width: 100%; height: clamp(430px, 68vh, 680px); touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 #calorie-chart { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
@@ -151,9 +148,7 @@ dialog form { max-height: min(88dvh, 820px); padding: 22px; overflow-y: auto; }
   .stats-toolbar { position: fixed; top: 6px; bottom: 96px; left: max(6px, env(safe-area-inset-left)); display: flex; width: 102px; min-height: 0; flex-direction: column; justify-content: center; margin: 0; }
   .date-picker-control { order: -1; width: 100%; padding: 6px 0; }
   .date-button { width: 38px; height: 32px; }
-  .chart-total-summary { min-height: 24px; margin: 0 4px 4px; }
-  .stack-help { display: none; }
-  .chart-card { display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; height: calc(100% - 28px); max-height: calc(100% - 28px); padding: 7px 9px 4px; overflow: hidden; border-radius: 14px; }
+  .chart-card { display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; height: 100%; max-height: 100%; padding: 7px 9px 4px; overflow: hidden; border-radius: 14px; }
   .chart-wrap { flex: 1 1 0; min-height: 0; height: 0; max-height: 100%; overflow: hidden; }
   body.stats-active .bottom-nav { left: max(6px, env(safe-area-inset-left)); bottom: 6px; display: flex; flex-direction: column; width: 102px; padding: 4px; transform: none; }
   .nav-button { min-height: 38px; }
