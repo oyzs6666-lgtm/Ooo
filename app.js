@@ -13,7 +13,6 @@ let mergeState = loadObject(MERGE_KEY);
 let uiState = loadObject(UI_KEY);
 let statsDate = /^\d{4}-\d{2}-\d{2}$/.test(uiState.statsDate || '') ? uiState.statsDate : dateKey(new Date());
 if (statsDate > dateKey(new Date())) statsDate = dateKey(new Date());
-let currentView = uiState.view === 'stats' ? 'stats' : 'record';
 let editingId = null;
 let selectedGroupId = null;
 let chartBars = [];
@@ -21,19 +20,13 @@ let pointerState = null;
 let longPressTimer = null;
 let chartAnimation = null;
 let toastTimer;
-let scrollSaveTimer;
 
 const elements = {
-  todayLabel: document.querySelector('#today-label'),
   todayCalories: document.querySelector('#today-calories'),
-  foodName: document.querySelector('#food-name'),
-  foodCalories: document.querySelector('#food-calories'),
-  saveButton: document.querySelector('#save-button'),
+  summaryTitle: document.querySelector('#summary-title'),
   todayRecords: document.querySelector('#today-records'),
   entryCount: document.querySelector('#entry-count'),
-  recordView: document.querySelector('#record-view'),
   statsView: document.querySelector('#stats-view'),
-  navButtons: [...document.querySelectorAll('.nav-button')],
   editRecordDialog: document.querySelector('#edit-record-dialog'),
   editRecordForm: document.querySelector('#edit-record-form'),
   editFoodName: document.querySelector('#edit-food-name'),
@@ -50,7 +43,6 @@ const elements = {
   chartWrap: document.querySelector('#chart-wrap'),
   chartEmpty: document.querySelector('#chart-empty'),
   chartTooltip: document.querySelector('#chart-tooltip'),
-  statsFoodRecords: document.querySelector('#stats-food-records'),
   toast: document.querySelector('#toast')
 };
 
@@ -85,8 +77,6 @@ function persistUiState() {
 }
 
 function rememberUiState() {
-  if (currentView === 'record') uiState.recordScroll = Math.max(0, window.scrollY || 0);
-  uiState.view = currentView;
   uiState.statsDate = statsDate;
   persistUiState();
 }
@@ -158,10 +148,9 @@ function entriesForDate(key) {
 }
 
 function renderHome() {
-  const today = dateKey(new Date());
-  const records = entriesForDate(today).slice().reverse();
+  const records = entriesForDate(statsDate).slice().reverse();
   const total = records.reduce((sum, entry) => sum + (Number(entry.calories) || 0), 0);
-  elements.todayLabel.textContent = formatDate(today);
+  elements.summaryTitle.textContent = statsDate === dateKey(new Date()) ? '今日已记录热量' : '当日已记录热量';
   elements.todayCalories.textContent = total.toLocaleString('zh-CN');
   elements.entryCount.textContent = `${records.length} 条`;
   elements.todayRecords.innerHTML = records.length ? records.map((entry) => {
@@ -175,42 +164,7 @@ function renderHome() {
       </button>
       <button class="delete-record" type="button" data-delete="${entry.id}" aria-label="删除${formatTime(entry.timestamp)}的记录">×</button>
     </article>`;
-  }).join('') : '<p class="empty-records">今天还没有热量记录。</p>';
-}
-
-function updateSaveButton() {
-  const calories = Number(elements.foodCalories.value);
-  const valid = Number.isFinite(calories) && calories > 0;
-  elements.saveButton.disabled = !valid;
-  elements.saveButton.textContent = valid ? `记录 ${calories} kcal` : '填写热量后记录';
-}
-
-function saveRecord() {
-  const calories = Number(elements.foodCalories.value);
-  if (!Number.isFinite(calories) || calories <= 0 || calories > 99999) {
-    showToast('请填写有效的热量数字');
-    return;
-  }
-  const record = {
-    id: makeId(),
-    timestamp: new Date().toISOString(),
-    food: elements.foodName.value.trim(),
-    calories
-  };
-  entries.push(record);
-  try {
-    persistEntries();
-  } catch {
-    entries.pop();
-    showToast('保存失败，浏览器存储空间可能已满');
-    return;
-  }
-  elements.foodName.value = '';
-  elements.foodCalories.value = '';
-  updateSaveButton();
-  renderHome();
-  if (dateKey(record.timestamp) === statsDate) renderChart();
-  showToast('热量记录已保存');
+  }).join('') : '<p class="empty-records">这一天还没有热量记录。</p>';
 }
 
 function updateStatsSaveButton() {
@@ -310,34 +264,6 @@ function saveEditedRecord(event) {
   showToast('记录已更新');
 }
 
-function restoreRecordScroll() {
-  const target = Math.max(0, Number(uiState.recordScroll) || 0);
-  const restore = () => window.scrollTo(0, target);
-  restore();
-  requestAnimationFrame(() => requestAnimationFrame(restore));
-  setTimeout(restore, 120);
-}
-
-function showView(name) {
-  if (currentView === 'record' && name !== 'record') uiState.recordScroll = Math.max(0, window.scrollY || 0);
-  currentView = name === 'stats' ? 'stats' : 'record';
-  uiState.view = currentView;
-  uiState.statsDate = statsDate;
-  persistUiState();
-  const showStats = currentView === 'stats';
-  document.documentElement.classList.toggle('stats-active', showStats);
-  document.body.classList.toggle('stats-active', showStats);
-  elements.recordView.hidden = showStats;
-  elements.statsView.hidden = !showStats;
-  elements.navButtons.forEach((button) => {
-    const active = button.dataset.view === currentView;
-    button.classList.toggle('is-active', active);
-    active ? button.setAttribute('aria-current', 'page') : button.removeAttribute('aria-current');
-  });
-  if (showStats) requestAnimationFrame(renderChart);
-  else restoreRecordScroll();
-}
-
 function moveStatsDay(offset) {
   const date = dateFromKey(statsDate);
   date.setDate(date.getDate() + offset);
@@ -422,15 +348,6 @@ function splitGroup(groupId) {
   showToast('已恢复为原来的记录');
 }
 
-function renderStatsFoodRecords() {
-  const foodRecords = calorieEntriesForStats().filter((entry) => String(entry.food || '').trim());
-  elements.statsFoodRecords.innerHTML = foodRecords.map((entry) => `<article class="stats-food-row">
-    <time class="stats-food-time" datetime="${entry.timestamp}">${formatTime(entry.timestamp)}</time>
-    <div class="stats-food-name">${escapeHtml(entry.food)}</div>
-    <div class="stats-food-calories">${entry.calories} kcal</div>
-  </article>`).join('');
-}
-
 function foodLabelForGroup(group) {
   return group.entries
     .map((entry) => String(entry.food || '').trim())
@@ -439,7 +356,7 @@ function foodLabelForGroup(group) {
 }
 
 function renderChart(animatedTotal = null) {
-  renderStatsFoodRecords();
+  renderHome();
   const groups = groupedCalories();
   const dailyTotal = groups.reduce((sum, group) => sum + group.total, 0);
   const visibleTotal = animatedTotal === null ? dailyTotal : Math.max(0, Math.min(dailyTotal, animatedTotal));
@@ -639,8 +556,6 @@ function showToast(message) {
   toastTimer = setTimeout(() => elements.toast.classList.remove('is-visible'), 1900);
 }
 
-elements.foodCalories.addEventListener('input', updateSaveButton);
-elements.saveButton.addEventListener('click', saveRecord);
 elements.statsFoodCalories.addEventListener('input', updateStatsSaveButton);
 elements.statsQuickEntry.addEventListener('submit', saveStatsRecord);
 elements.todayRecords.addEventListener('click', (event) => {
@@ -654,7 +569,6 @@ document.querySelectorAll('[data-close-edit]').forEach((button) => button.addEve
   editingId = null;
   elements.editRecordDialog.close();
 }));
-elements.navButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view)));
 document.querySelector('#previous-day').addEventListener('click', () => moveStatsDay(-1));
 elements.nextDay.addEventListener('click', () => moveStatsDay(1));
 elements.statsDateInput.addEventListener('change', () => {
@@ -662,6 +576,7 @@ elements.statsDateInput.addEventListener('change', () => {
   statsDate = elements.statsDateInput.value;
   selectedGroupId = null;
   rememberUiState();
+  renderHome();
   renderChart();
 });
 elements.chart.addEventListener('pointerdown', startChartInteraction);
@@ -673,33 +588,22 @@ elements.chart.addEventListener('selectstart', (event) => event.preventDefault()
 elements.chart.addEventListener('dragstart', (event) => event.preventDefault());
 
 if ('ResizeObserver' in window) {
-  const resizeObserver = new ResizeObserver(() => {
-    if (!elements.statsView.hidden) renderChart();
-  });
+  const resizeObserver = new ResizeObserver(() => renderChart());
   resizeObserver.observe(elements.chartWrap);
 } else {
-  window.addEventListener('resize', () => { if (!elements.statsView.hidden) renderChart(); });
+  window.addEventListener('resize', renderChart);
 }
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) rememberUiState();
   else {
-    renderHome();
     if (statsDate > dateKey(new Date())) statsDate = dateKey(new Date());
-    if (currentView === 'stats') renderChart();
-    else restoreRecordScroll();
+    renderChart();
   }
 });
-window.addEventListener('scroll', () => {
-  if (currentView !== 'record') return;
-  uiState.recordScroll = Math.max(0, window.scrollY || 0);
-  clearTimeout(scrollSaveTimer);
-  scrollSaveTimer = setTimeout(persistUiState, 180);
-}, { passive: true });
 window.addEventListener('pagehide', rememberUiState);
-window.addEventListener('pageshow', () => showView(currentView));
+window.addEventListener('pageshow', renderChart);
 
 renderHome();
-updateSaveButton();
 updateStatsSaveButton();
-showView(currentView);
+requestAnimationFrame(renderChart);
