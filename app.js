@@ -451,7 +451,7 @@ function renderChart(animatedTotal = null) {
   const labels = chartBars.filter((bar) => bar.fullyVisible)
     .map((bar) => ({ bar, desired: bar.y + bar.height / 2, y: bar.y + bar.height / 2 }))
     .sort((first, second) => first.desired - second.desired);
-  const minGap = compact ? 12 : 14;
+  const minGap = compact ? 15 : 17;
   labels.forEach((label, index) => {
     if (index) label.y = Math.max(label.y, labels[index - 1].y + minGap);
   });
@@ -465,7 +465,7 @@ function renderChart(animatedTotal = null) {
   }
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  ctx.font = `${compact ? 6.5 : 7.5}px system-ui, sans-serif`;
+  ctx.font = `${compact ? 8.5 : 9.5}px system-ui, sans-serif`;
   labels.forEach(({ bar, y }) => {
     ctx.strokeStyle = '#c9c4bb';
     ctx.lineWidth = 1;
