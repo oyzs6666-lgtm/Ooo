@@ -1,0 +1,12 @@
+{
+  "name": "今日热量 · 累积柱",
+  "short_name": "热量累积柱",
+  "description": "记录每天的食物与热量，通过可合并和拆解的累积柱查看当日摄入。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ee",
+  "theme_color": "#f7f4ee",
+  "lang": "zh-CN",
+  "icons": []
+}

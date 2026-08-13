@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="今日热量">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css?v=1">
+  <title>今日热量 · 累积柱</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">DAILY ENERGY</p>
+        <h1>今天，吃了多少？</h1>
+        <p class="date-line" id="today-label"></p>
+      </div>
+    </header>
+
+    <main>
+      <section id="record-view" class="view is-active" aria-labelledby="record-tab">
+        <div class="calorie-summary" aria-live="polite">
+          <span>今日已记录热量</span>
+          <strong><span id="today-calories">0</span><small> kcal</small></strong>
+        </div>
+
+        <section class="details-section" aria-labelledby="details-heading">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">NEW ENTRY</p>
+              <h2 id="details-heading">记录一次摄入</h2>
+            </div>
+          </div>
+          <div class="input-stack">
+            <label>
+              <span>食物名称（选填）</span>
+              <input id="food-name" type="text" maxlength="80" autocomplete="off" placeholder="例如：蛋糕">
+            </label>
+            <label>
+              <span>热量</span>
+              <span class="unit-input">
+                <input id="food-calories" type="number" min="1" max="99999" inputmode="decimal" placeholder="例如：450">
+                <span>kcal</span>
+              </span>
+            </label>
+          </div>
+          <button class="save-button" id="save-button" type="button" disabled>填写热量后记录</button>
+          <p class="save-hint">保存时自动读取手机当前时间；统计页会按时间区间汇总热量。</p>
+        </section>
+
+        <section class="recent-section" aria-labelledby="recent-heading">
+          <div class="section-heading compact">
+            <h2 id="recent-heading">今日记录</h2>
+            <span id="entry-count">0 条</span>
+          </div>
+          <div id="today-records" class="records-list"></div>
+        </section>
+      </section>
+
+      <section id="stats-view" class="view stats-view" aria-labelledby="stats-tab" hidden>
+        <div class="stats-toolbar">
+          <button class="date-button" id="previous-day" type="button" aria-label="前一天">‹</button>
+          <div class="date-picker-control">
+            <div class="date-picker-button" aria-hidden="true">
+              <strong id="stats-date-label"></strong>
+              <span>点击选择日期</span>
+            </div>
+            <input id="stats-date-input" class="date-picker-native" type="date" aria-label="选择统计日期">
+          </div>
+          <button class="date-button" id="next-day" type="button" aria-label="后一天">›</button>
+        </div>
+        <div class="chart-total-summary" aria-live="polite">
+          <span id="chart-total-title">今日总热量</span>
+          <strong><span id="chart-total-value">0</span> kcal</strong>
+        </div>
+        <p class="stack-help">拖动色块到另一色块可合并；长按已合并色块可拆解。</p>
+        <div class="chart-card">
+          <div class="chart-wrap" id="chart-wrap">
+            <canvas id="calorie-chart" role="img" aria-label="当天0至1800千卡的累积热量柱状图"></canvas>
+            <div class="chart-empty" id="chart-empty" hidden>这一天还没有热量记录</div>
+            <div class="chart-tooltip bar-summary" id="chart-tooltip" hidden></div>
+          </div>
+        </div>
+        <div class="stats-food-records" id="stats-food-records" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主要页面">
+      <button class="nav-button is-active" id="record-tab" type="button" data-view="record" aria-current="page">
+        <span aria-hidden="true">●</span><span>记录</span>
+      </button>
+      <button class="nav-button" id="stats-tab" type="button" data-view="stats">
+        <span aria-hidden="true">▥</span><span>统计</span>
+      </button>
+    </nav>
+  </div>
+
+  <dialog id="edit-record-dialog">
+    <form method="dialog" id="edit-record-form">
+      <div class="dialog-header">
+        <div><p class="section-kicker">EDIT ENTRY</p><h2>编辑这条记录</h2></div>
+        <button class="close-button" type="button" data-close-edit aria-label="关闭">×</button>
+      </div>
+      <p class="dialog-intro">修改后，今日热量与柱状图会自动重新计算。</p>
+      <div class="edit-fields calorie-edit-fields">
+        <label>
+          <span>食物名称（选填）</span>
+          <input id="edit-food-name" type="text" maxlength="80" autocomplete="off" placeholder="例如：蛋糕">
+        </label>
+        <label>
+          <span>热量</span>
+          <span class="unit-input">
+            <input id="edit-food-calories" type="number" min="1" max="99999" inputmode="decimal" required>
+            <span>kcal</span>
+          </span>
+        </label>
+        <label>
+          <span>记录时间</span>
+          <input id="edit-record-time" type="time" required>
+        </label>
+      </div>
+      <div class="dialog-actions edit-dialog-actions">
+        <button class="secondary-button" type="button" data-close-edit>取消</button>
+        <button class="primary-button" type="submit">保存修改</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js?v=1"></script>
+  <script>
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
